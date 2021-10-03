@@ -8,12 +8,14 @@ library(caret)
 # Load datasets -----------------------------------------------------------
 
 train <- fread("./project/volume/data/raw/start_train.csv")
-test <- fread("./project/volume/data/raw/start_test.csv")
+test <- fread("./project/volume/data/raw/start_test.csv",skip=1)
+test <- test[,.(V1)]
+setnames(test,'V1','id')
 card_tab <- fread("./project/volume/data/raw/card_tab.csv")
 
 ### remove duplicates
 train <- train[!duplicated(train),]
-card_tab <- card_tab[!duplicated(card_tab),]a
+card_tab <- card_tab[!duplicated(card_tab),]
 
 
 # Make master -------------------------------------------------------------
