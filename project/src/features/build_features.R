@@ -40,6 +40,11 @@ master <- rbind(train, test)
 
 ### we will use [rarity], [supertypes], [types], and [color]
 
+### define legendary 1 if the card's supertype is legendary or 0 otherwise
+unique(card_tab$supertypes)
+card_tab$legendary <- 0
+card_tab$legendary[grep("Legendary",card_tab$supertypes)] <- 1
+
 ### make a table for type
 unique(card_tab$types)
 types_tab <- as.data.table(tstrsplit(card_tab$types," "))
@@ -64,7 +69,7 @@ colors_tab[colors_tab == 2] <- 1
 ### merge with master
 setkey(master,id)
 setkey(card_tab,id)
-master <- merge(master, card_tab[,.(id, rarity)], all.x=T)
+master <- merge(master, card_tab[,.(id, rarity, legendary)], all.x=T)
 setkey(types_tab,id)
 master <- merge(master, types_tab, all.x=T)
 setkey(colors_tab,id)
