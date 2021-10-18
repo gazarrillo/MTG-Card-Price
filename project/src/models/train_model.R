@@ -65,7 +65,7 @@ sample_sub <- merge(sample_sub, result, sort=F)
 fwrite(sample_sub, "./project/volume/data/processed/submit_lm.csv")
 
 
-# fit a lasso model -------------------------------------------------------
+# fit a ridge model -------------------------------------------------------
 
 drops <- c('id')
 train <- train[, !drops, with = FALSE]
@@ -93,7 +93,7 @@ test <- data.table(test)
 train <- as.matrix(train)
 
 ### fit a model
-model1 <- cv.glmnet(train, train_y, alpha=1, family="gaussian")
+model1 <- cv.glmnet(train, train_y, alpha=0, family="gaussian")
 
 ### choose the best lambda
 best_lambda <- model1$lambda.min
@@ -104,7 +104,7 @@ predict(model1, s=best_lambda, newx=test, type="coefficients")
 
 # Fit a full model --------------------------------------------------------
 
-model2 <- glmnet(train, train_y, alpha=1, family="gaussian")
+model2 <- glmnet(train, train_y, alpha=0, family="gaussian")
 
 plot_glmnet(model2)
 
@@ -126,4 +126,4 @@ sample_sub <- fread("./project/volume/data/raw/sample_sub.csv")
 
 sample_sub$future_price <- pred
 
-fwrite(sample_sub, "./project/volume/data/processed/submit_lasso.csv")
+fwrite(sample_sub, "./project/volume/data/processed/submit_ridge.csv")
