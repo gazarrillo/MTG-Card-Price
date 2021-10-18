@@ -38,12 +38,17 @@ master <- rbind(train, test)
 
 # Combine features with master --------------------------------------------
 
-### we will use [supertypes] and [types]
+### we will use [rarity] and [types]
 
-### define legendary 1 if the card's supertype is legendary or 0 otherwise
-unique(card_tab$supertypes)
-card_tab$legendary <- 0
-card_tab$legendary[grep("Legendary",card_tab$supertypes)] <- 1
+### make a table for rarity
+unique(card_tab$rarity)
+rarities_tab <- as.data.table(card_tab$rarity)
+rarities_tab$id <- card_tab$id
+
+### make a dummy variable for rarity
+rarities_tab_m <- melt(rarities_tab, id.vars = "id")
+rarities_tab_m <- rarities_tab_m[!is.na(rarities_tab_m$value)]
+rarities_tab <- dcast(rarities_tab_m, id ~ value, length)
 
 ### make a table for type
 unique(card_tab$types)
@@ -58,10 +63,11 @@ types_tab <- dcast(types_tab_m, id ~ value, length)
 ### merge with master
 setkey(master,id)
 setkey(card_tab,id)
-master <- merge(master, card_tab[,.(id,rarity,legendary)], all.x=T)
+master <- merge(master, card_tab[,.(id)], all.x=T)
 setkey(types_tab,id)
 master <- merge(master, types_tab, all.x=T)
-
+setkey(rarities_tab, id)
+master <- merge(master, rarities_tab, all.x=T)
 
 # Split back to train and test --------------------------------------------
 
