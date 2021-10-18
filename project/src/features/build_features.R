@@ -38,17 +38,7 @@ master <- rbind(train, test)
 
 # Combine features with master --------------------------------------------
 
-### we will use [rarity] and [types]
-
-### make a table for rarity
-unique(card_tab$rarity)
-rarities_tab <- as.data.table(card_tab$rarity)
-rarities_tab$id <- card_tab$id
-
-### make a dummy variable for rarity
-rarities_tab_m <- melt(rarities_tab, id.vars = "id")
-rarities_tab_m <- rarities_tab_m[!is.na(rarities_tab_m$value)]
-rarities_tab <- dcast(rarities_tab_m, id ~ value, length)
+### we will use [rarity], [supertypes], [types], and [color]
 
 ### make a table for type
 unique(card_tab$types)
@@ -60,14 +50,28 @@ types_tab_m <- melt(types_tab, id.vars = "id")
 types_tab_m <- types_tab_m[!is.na(types_tab_m$value)]
 types_tab <- dcast(types_tab_m, id ~ value, length)
 
+### make a table for color
+unique(card_tab$colors)
+colors_tab <- as.data.table(tstrsplit(card_tab$colors," "))
+colors_tab$id <- card_tab$id
+
+### make a dummy variable for color
+colors_tab_m <- melt(colors_tab, id.vars = "id")
+colors_tab_m <- colors_tab_m[!is.na(colors_tab_m$value)]
+colors_tab <- dcast(colors_tab_m, id ~ value, length)
+colors_tab[colors_tab == 2] <- 1
+
 ### merge with master
 setkey(master,id)
 setkey(card_tab,id)
-master <- merge(master, card_tab[,.(id)], all.x=T)
+master <- merge(master, card_tab[,.(id, rarity)], all.x=T)
 setkey(types_tab,id)
 master <- merge(master, types_tab, all.x=T)
-setkey(rarities_tab, id)
-master <- merge(master, rarities_tab, all.x=T)
+setkey(colors_tab,id)
+master <- merge(master, colors_tab, all.x=T)
+
+### set color na's in master to 0
+master[is.na(master)] <- 0
 
 # Split back to train and test --------------------------------------------
 
